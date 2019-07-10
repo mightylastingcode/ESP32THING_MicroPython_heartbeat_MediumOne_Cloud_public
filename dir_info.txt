@@ -1,0 +1,19 @@
+michael@michael-Inspiron-5551:~/Documents/ESP32THING/AMPY_RUN$ ampy -p /dev/ttyUSB0 ls
+/boot.py
+/lib
+/light_sensor.py (not used for heartbeat or sht31)
+/main.py
+/sht31.py  (not used for hearbeat)
+michael@michael-Inspiron-5551:~/Documents/ESP32THING/AMPY_RUN$ ampy -p /dev/ttyUSB0 ls -l
+/boot.py - 616 bytes
+/lib - 0 bytes
+/light_sensor.py - 2914 bytes
+/main.py - 5077 bytes
+/sht31.py - 3275 bytes (not used for heartbeat)
+michael@michael-Inspiron-5551:~/Documents/ESP32THING/AMPY_RUN$ ampy -p /dev/ttyUSB0 ls -l lib
+/lib/umqtt - 0 bytes
+michael@michael-Inspiron-5551:~/Documents/ESP32THING/AMPY_RUN$ ampy -p /dev/ttyUSB0 ls -l lib/umqtt
+/lib/umqtt/robust.py - 1045 bytes  (not used)
+/lib/umqtt/simple.py - 6411 bytes  (required)
+michael@michael-Inspiron-5551:~/Documents/ESP32THING/AMPY_RUN$ 
+
