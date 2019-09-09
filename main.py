@@ -37,6 +37,9 @@ from machine import Pin
 from umqtt.simple import MQTTClient
 
 
+from machine import Pin, I2C
+from light_sensor import LIGHT_Sensor
+
 blueledstate = 0
 
 # default MQTT setting
@@ -60,6 +63,7 @@ MQTT_USERNAME = "<PROJECT MQTT>/<USER MQTT>"
 MQTT_password = "<API Key>/<API user password>"
 '''
 
+
 SERVER 		  = "mqtt.mediumone.com"
 #PORT 		  = 61619  # non secured TCP port
 PORT 		  = 61620  # secured TCP port  (SSL must be True)
@@ -72,6 +76,7 @@ MQTT_USERNAME = "<PROJECT MQTT>/<USER MQTT>"
 MQTT_password = "<API Key>/<API user password>"
 
 SAMPLING_TIME   = 60  # 1 minute
+SAMPLING_LIGHT_TIME = 10 # 1 minute
 
 def sub_cb(topic, msg):	
 	global msg_rec_count
@@ -138,8 +143,15 @@ def main(clientID = CLIENTID, server = SERVER, topic = PUB_TOPIC):
 
 	previous_time = utime.time()
 	time_min = 0
-
 	c.subscribe(SUB_TOPIC)
+
+	# Set up Sensors
+	light_sensor_obj = LIGHT_Sensor(freq = 1000000, port = 2, csbpin = 22)
+	light_sensor_data = light_sensor_obj.get_light_sensor_data()
+	print ("Light sensor data = %d" % light_sensor_data)
+
+	sensor_previous_time = utime.time()
+
 	while True:
 		if False:
 			#print ('Waiting for subscribe message')			
@@ -155,15 +167,21 @@ def main(clientID = CLIENTID, server = SERVER, topic = PUB_TOPIC):
 			print("Dropping to REPL now")
 			sys.exit()			
 		current_time = utime.time()
-		if (current_time - previous_time) > SAMPLING_TIME:
-		#if (current_time - previous_time) > 60:  # fix the time to 1 min
+		sensor_current_time = utime.time()
+		#if (current_time - previous_time) > SAMPLING_TIME:
+		if (current_time - previous_time) > 60:  # fix the time to 1 min
 			time_min += 1
 			print ("Time (minutes) = ", time_min * SAMPLING_TIME / 60)
 			previous_time = current_time
 			obj['event_data']['heartbeat'] = 'true'
+			obj['event_data']['lightsensor'] = light_sensor_data 
 			print ("Publish sensor data.")
 			print (obj)
 			c.publish(topic, json.dumps(obj))    
+		if (sensor_current_time - sensor_previous_time) > SAMPLING_LIGHT_TIME:
+			light_sensor_data = light_sensor_obj.get_light_sensor_data()
+			print ("Light sensor data = %d" % light_sensor_data)
+			sensor_previous_time = sensor_current_time
 
 	print ('Client disconnect')			
 	c.disconnect()
@@ -174,6 +192,7 @@ print ("Python name : %s." % __name__)
 # Pin definitions
 repl_button = machine.Pin(0, machine.Pin.IN, machine.Pin.PULL_UP)
 blueled = machine.Pin(5, machine.Pin.OUT)
+
 
 if __name__ == "__main__":
 	main()
